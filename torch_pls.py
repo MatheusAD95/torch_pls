@@ -3,7 +3,18 @@ import torch
 class PLSRegression1:
     def __init__(self, n_components, cuda=True):
         self.n_components = n_components
-        self.cudaf = lambda x: x.cuda() if cuda else x
+        self.cuda = cuda
+        self.cudaf = lambda x: x.cuda() if self.cuda else x
+
+    def cuda(self):
+        self.cuda = True
+        self.P, self.W, self.Q, self.B = map(lambda x: x.cuda(), [self.P, self.W, self.Q, self.B])
+        self.x_mean, self.y_mean = map(lambda x: x.cuda(), [self.x_mean, self.y_mean])
+
+    def cpu(self):
+        self.cuda = False
+        self.P, self.W, self.Q, self.B = map(lambda x: x.cpu(), [self.P, self.W, self.Q, self.B])
+        self.x_mean, self.y_mean = map(lambda x: x.cpu(), [self.x_mean, self.y_mean])
 
     def fit(self, X, Y):
         E = self.cudaf(X - X.mean(dim=0))
